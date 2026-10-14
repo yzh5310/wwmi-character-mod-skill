@@ -1,0 +1,4 @@
+interface:
+  display_name: "鸣潮角色 Mod 制作与排错"
+  short_description: "基于本地采集自动制作鸣潮角色外观替换，并定位材质、权重和透视问题"
+  default_prompt: "使用 $wwmi-character-mod 制作或修复鸣潮角色外观 Mod，读取实际 WWMI 配置并按证据验证效果。"
