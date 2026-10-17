@@ -8,6 +8,24 @@
 
 长离采用 WWMI merged 模板的 Position、Vector、Color、TexCoord、Blend、Index 和 ShapeKey 缓冲区；其他版本应读当前模板。COLOR1 可能是辅助数据；贴图 alpha 可能是材质参数，不是透明度。离线预览误用 alpha 会产生虚假的淡色/透视。
 
+## DDS 与材质编码
+
+- 原生 diffuse 常见 BC7_UNORM_SRGB；而 Python/Pillow 写出的未压缩 DDS 是 UNORM。着色器会把 UNORM 数据当线性值采样，导致中间调偏亮、发灰。写前把 diffuse 从 sRGB 转线性（boot/skin/wrap/lining 同样处理），法线/lightmap 保持线性。
+- Pillow 写的 DDS 默认只有 1 级 mip：GPU 永远采样 level 0，远景细纹会出现斜纹/噪点。用 `scripts/dds_mips.py` 生成完整盒式滤波 mip 链，法线逐级重新归一化。实测 3dmigoto 能加载带 mip 的未压缩 DDS。
+- 贴图 alpha 在部分材质框架里是**启用开关/材质参数**，不是透明度（例如 RabbitFX：diffuse=102、cloth-normal=200、boot-normal=210、skin-normal=255、light=0）。不要为了「看起来更实」把 alpha 改成 255，那可能让整个部件不渲染。改动前先读旧版的每通道 alpha 并逐张断言。
+- 常量 UV 的部件（lining/wrap/皮肤补接）用 8×8 平贴图是正确设计，不是占位缺陷；真正需要补的是使用真实 UV 的部件。
+- 自写图集的 V 方向、法线编码（BC5 风格 X/Y 在 R/G、B=0）要与原生一致，方向判定见 [runtime-debugging.md](runtime-debugging.md)。
+
+## AI 图生 3D 网格（只有图片时）
+
+本地 Hunyuan3D-2mini 等模型可以生成可编辑 GLB 底稿，但只能当建模参考：
+
+- 固定模型 revision、参数与 seed，并记录输入哈希；纯几何生成在 8GB 显存机器上可行（本次峰值约 2.25GB）。
+- 生成结果常见薄片、粘连（袖口/裙摆/发丝）、背面推测；清理到 6 万面左右便于后续处理。
+- 自动 UV（xatlas）会在接缝复制顶点：按顶点连通性统计的「碎片数」会暴涨（本次 3 块 → 1595 个连通块），不能据此判定网格真的碎裂；要看边界边、薄片和视觉。
+- 切割、开口封口、补面、剪枝都会制造新的薄片和开放边界，也直接影响最终「质感」。绑定优先整体网格 + 区域权重，不要为了权重方便把衣服切碎。封口要保留源面 ID/UV 映射并做独立相交检测，`watertight` 不是质量合格证明。
+- **质量上限由 AI 网格决定**。贴图、法线、AO 只能改善观感；若目标是「有质感」，优先复用官方网格重贴图，或重新生成更干净的网格并避免破坏性切割。
+
 ## 骨骼转移
 
 1. 先确定语义和供体部件，再用最近点、表面投影或骨骼对应。距离小不等于骨骼正确。

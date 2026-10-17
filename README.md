@@ -2,7 +2,7 @@
 
 供 Codex 在 Windows 上使用的 XXMI / WWMI 角色外观 Mod 制作与修复技能。基于本地采集和实际着色器证据进行材质适配、权重转移及游戏验证。
 
-适用于服装替换、阶段换装/溶解、原皮纹理残留、拉伸尖角、黑影和近镜头透视。已有兼容三维资源时可自动化适配；只有参考图片时先判断资源可行性，不承诺自动补齐模型、UV和动画权重。
+适用于服装替换、阶段换装/溶解、原皮纹理残留、拉伸尖角、黑影和近镜头透视。已有兼容三维资源时可自动化适配；只有参考图片时先判断资源可行性，可按绯雪礼盒案例走「AI 图生 3D 底稿 → 清理/UV/绑定」链路，但不承诺自动补齐模型、UV 和动画权重，且要明确 AI 网格是质量上限。
 
 ## 安装与调用
 
@@ -16,14 +16,16 @@
 
 - [技能入口](skills/wwmi-character-mod/SKILL.md)：工作范围、流程及参考路由。
 - [阶段效果](skills/wwmi-character-mod/references/stage-effects.md)：逐层证据、停画/溶解区分、定向规则与验证边界。
-- [运行时排错](skills/wwmi-character-mod/references/runtime-debugging.md)：材质槽、F8采集、ShaderRegex、截图与配置恢复。
-- [网格与权重](skills/wwmi-character-mod/references/geometry-and-build.md)：缓冲区接口、供体选择、骨骼重映射与三角形检查。
-- [长离案例](skills/wwmi-character-mod/references/changli-case.md)、[守岸人案例](skills/wwmi-character-mod/references/shorekeeper-case.md)：已验证经验及仍未解决的边界。
+- [运行时排错](skills/wwmi-character-mod/references/runtime-debugging.md)：材质槽、贴图 V 约定、诊断色定位、前向通道标记、F8采集、ShaderRegex、截图与配置恢复。
+- [网格与权重](skills/wwmi-character-mod/references/geometry-and-build.md)：缓冲区接口、DDS/材质编码、AI 图生 3D、供体选择、骨骼重映射与三角形检查。
+- [长离案例](skills/wwmi-character-mod/references/changli-case.md)、[守岸人案例](skills/wwmi-character-mod/references/shorekeeper-case.md)、[绯雪礼盒案例](skills/wwmi-character-mod/references/hiyuki-case.md)：已验证经验及仍未解决的边界。
 - `scripts/inspect_wwmi.py`：只读解析实际导入器路径、快捷键、采集开关与导出范围。
 - `scripts/audit_shader.py`：只读列出淡出组合、discard与临时参数线索。
 - `scripts/capture_game.ps1`：按物理像素截取本地游戏窗口，需要随后人工或模型查看。
+- `scripts/probe_texture_v_convention.py`：用采集的原生网格+贴图判断游戏的贴图 V 约定。
+- `scripts/dds_mips.py`：给未压缩 DDS 补全 mip 链（法线逐级归一化）。
 
-只读 Python 工具使用 Python 3 标准库；截图脚本使用 Windows PowerShell/.NET。实际制作需用户本机的 XXMI/WWMI、适用素材及相应构建工具。
+只读 Python 工具使用 Python 3 标准库；贴图方向/mip 脚本需要 numpy/Pillow；截图脚本使用 Windows PowerShell/.NET。实际制作需用户本机的 XXMI/WWMI、适用素材及相应构建工具。
 
 ## 证据与限制
 

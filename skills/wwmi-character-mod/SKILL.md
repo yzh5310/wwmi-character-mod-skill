@@ -18,12 +18,14 @@ description: 制作或修复 Windows 鸣潮角色外观 Mod，使用 XXMI/WWMI�
 
 有兼容现成 Mod 时先核验来源和当前兼容性；有三维模型时进行部件/骨骼/材质适配；只有图片时先做资源可行性判断或小样，不承诺全自动成品。
 
+只有一张插画、需要用 AI 图生 3D 时，按 [hiyuki-case.md](references/hiyuki-case.md) 的链路先做小样（固定模型版本/参数、检查薄片与粘连），并明确 **AI 网格只是底稿、质量上限由网格决定**。后续切割/封口/剪枝会进一步制造薄片，绑定优先整体网格 + 区域权重。
+
 工具许可与游戏模型/贴图的权利分别记录。可从 WWMI-Tools、WWMI-Assets 获取必要范围，固定 commit 并校验清单；不要因工具开源而宣称游戏素材也开源。用当前客户端采集确定运行时接口。
 
 1. **采集基线。** 备份要修改的配置键，确认 Hunting 和真实输出目录。核对新增文件、时间和目标部件再处理。键盘注入没有成功证据时请用户手动按键，不反复声称已刷新。定向采集优先于反复全帧导出。
 2. **核对接口。** 读取 fmt/Metadata 的布局、索引、骨骼映射、影响数与表情键。处理二进制或权重时读 [geometry-and-build.md](references/geometry-and-build.md)，保留原始源数据。
 3. **适配材质。** 衣物、身体、头发、脸分别处理。界面、场景、深度/阴影和前向通道可能不同，某张截图正确不代表全部通过。
-4. **构建检查。** 验证缓冲区尺寸、索引、有效骨骼、归一化权重、表情偏移、INI 重名/引用/依赖。安装前备份将替换的文件，核对输出与安装哈希。
+4. **构建检查。** 验证缓冲区尺寸、索引、有效骨骼、归一化权重、表情偏移、INI 重名/引用/依赖。安装前备份将替换的文件，核对输出与安装哈希。自写 DDS 时核对编码：未压缩 UNORM 与原生 sRGB 的差异（写前转线性）、mip 链、法线约定与贴图 alpha 语义，见 [geometry-and-build.md](references/geometry-and-build.md)。
 5. **游戏复核。** 确认实际刷新、当前角色与视角，再看上身、腿、衣料和底面；改过动作权重时检查走动/跳跃/普攻。静态通过、shader 命中、用户确认和截图验证分别记录。
 
 检查叠层换装、爆衣、燃烧或大招阶段时，读 [stage-effects.md](references/stage-effects.md)。先建立分部件的目标规则与证据，再区分停画、溶解和材质接口变化；不把常态正确当作全阶段一致。
@@ -47,6 +49,9 @@ description: 制作或修复 Windows 鸣潮角色外观 Mod，使用 XXMI/WWMI�
 
 - 复用本次长离经验或找旧工程时，读 [changli-case.md](references/changli-case.md)。其中哈希、阈值和映射仅为 2026-10-14～15 案例，不是其他角色模板。
 - 修复衣料/脸部残留淡出、鞋底发黑，或查找守岸人工程时，读 [shorekeeper-case.md](references/shorekeeper-case.md)。其中槽位、参数和着色器只适用于该次采集，不能直接套用。
+- 只有一张插画、走 AI 图生 3D 全链路，或遇到「贴图像镜像/碎块」「黄绿色色块」「放大像印花」时，读 [hiyuki-case.md](references/hiyuki-case.md)。案例含 V 约定对照脚本、诊断色法、组件4 前向 VS 标记缺失的修复。
 - `scripts/inspect_wwmi.py` 只读检查实际路径、关键诊断设置，不输出整份启动器配置。
 - `scripts/audit_shader.py <shader文本...>` 只读列出淡出组合、discard和临时参数读取；帮助发现遗漏因子，不自动生成补丁或判定修复成功。
 - `scripts/capture_game.ps1` 按物理像素截窗口，临时收起指定遮挡应用后恢复；不发送按键或修改游戏配置。
+- `scripts/probe_texture_v_convention.py --capture <采集目录> --component <N> --diffuse <dds>`：用原生网格+原生贴图对照两种 V 约定，判断游戏采样方向。
+- `scripts/dds_mips.py <Textures目录>`：给未压缩 DDS 补全 mip 链（法线逐级归一化），避免远景细纹噪点。
